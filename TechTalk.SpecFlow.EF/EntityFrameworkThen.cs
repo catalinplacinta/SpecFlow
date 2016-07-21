@@ -35,8 +35,7 @@ namespace TechTalk.SpecFlow.EF
                 throw new ArgumentException(string.Format("Expression '{0}' refers to a field, not a property.", propertyLambda));
             }
 
-
-            if (type != propInfo.ReflectedType && !type.IsSubclassOf(propInfo.ReflectedType))
+            if (propInfo.ReflectedType != null && (type != propInfo.ReflectedType && !type.IsSubclassOf(propInfo.ReflectedType)))
             {
                 throw new ArgumentException(string.Format("Expresion '{0}' refers to a property that is not from type {1}.", propertyLambda, type));
             }
@@ -83,7 +82,7 @@ namespace TechTalk.SpecFlow.EF
             return Expression.Lambda<Func<T, bool>>(left, pe);
         }
 
-        private static Expression<Func<T,bool>> BuildLookupExpression(T entity, Expression<Func<T, object>>[] lookupProperties)
+        private static Expression<Func<T,bool>> BuildLookupExpression(T entity, IEnumerable<Expression<Func<T, object>>> lookupProperties)
         {
             var lookupPropertiesValues = new Dictionary<string, object>();
 
@@ -102,7 +101,7 @@ namespace TechTalk.SpecFlow.EF
             return BuildLookupExpression(lookupPropertiesValues);
         }
 
-        private void CheckEntity(T entity, T entityToCheck, Expression<Func<T, object>>[] propertiesToCheck)
+        private static void CheckEntity(T entity, T entityToCheck, IEnumerable<Expression<Func<T, object>>> propertiesToCheck)
         {
             if (propertiesToCheck
                 .Select(propertyToCheck => propertyToCheck.Compile())
